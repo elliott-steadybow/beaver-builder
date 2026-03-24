@@ -1,3 +1,20 @@
+const https = require('https');
+
+function makeRequest(url, options, body) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(url, options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        resolve({ statusCode: res.statusCode, body: data });
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method not allowed' };
@@ -9,36 +26,37 @@ exports.handler = async (event) => {
   }
 
   const MODEL = 'gemini-2.0-flash';
-  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
   const { action, outfit, location } = JSON.parse(event.body);
 
+  const requestBody = JSON.stringify({
+    contents: [{
+      parts: [{
+        text: `You are naming a cute cartoon beaver character for children aged 5-6. The beaver is ${action}, wearing a ${outfit}, ${location}. Generate ONE silly, fun, child-appropriate name for this beaver. Just the name, nothing else. Examples of the vibe: "Captain Splashington", "Professor Wobblebottom", "Sir Chomps-a-Lot", "Twiggy McPaddletail". Be creative and funny.`
+      }]
+    }],
+    generationConfig: {
+      maxOutputTokens: 20,
+      temperature: 1.2
+    }
+  });
+
   try {
-    const response = await fetch(API_URL, {
+    const result = await makeRequest(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': API_KEY
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `You are naming a cute cartoon beaver character for children aged 5-6. The beaver is ${action}, wearing a ${outfit}, ${location}. Generate ONE silly, fun, child-appropriate name for this beaver. Just the name, nothing else. Examples of the vibe: "Captain Splashington", "Professor Wobblebottom", "Sir Chomps-a-Lot", "Twiggy McPaddletail". Be creative and funny.`
-          }]
-        }],
-        generationConfig: {
-          maxOutputTokens: 20,
-          temperature: 1.2
-        }
-      })
-    });
+      headers: { 'Content-Type': 'application/json' }
+    }, requestBody);
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      return { statusCode: response.status, body: JSON.stringify(data) };
+    if (result.statusCode !== 200) {
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'Mystery Beaver' })
+      };
     }
 
+    const data = JSON.parse(result.body);
     const name = data.candidates[0].content.parts[0].text.trim().replace(/"/g, '');
 
     return {

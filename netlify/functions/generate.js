@@ -1,3 +1,20 @@
+const https = require('https');
+
+function makeRequest(url, options, body) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(url, options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        resolve({ statusCode: res.statusCode, body: data });
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method not allowed' };
@@ -9,36 +26,23 @@ exports.handler = async (event) => {
   }
 
   const MODEL = 'gemini-2.0-flash-exp';
-  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
   try {
-    const response = await fetch(API_URL, {
+    const result = await makeRequest(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': API_KEY
-      },
-      body: event.body
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        statusCode: response.status,
-        body: JSON.stringify(data)
-      };
-    }
+      headers: { 'Content-Type': 'application/json' }
+    }, event.body);
 
     return {
-      statusCode: 200,
+      statusCode: result.statusCode,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: result.body
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Generation failed' })
+      body: JSON.stringify({ error: 'Generation failed', detail: err.message })
     };
   }
 };
