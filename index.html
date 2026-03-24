@@ -371,9 +371,10 @@
 
         // Find the image part in the response (might not be first if TEXT is also returned)
         const parts = data.candidates[0].content.parts;
-        const imagePart = parts.find(p => p.inline_data);
+        const imagePart = parts.find(p => p.inlineData || p.inline_data);
         if (!imagePart) throw new Error('No image in response');
-        generatedImage.src = `data:${imagePart.inline_data.mime_type};base64,${imagePart.inline_data.data}`;
+        const imgData = imagePart.inlineData || imagePart.inline_data;
+        generatedImage.src = `data:${imgData.mimeType || imgData.mime_type};base64,${imgData.data}`;
 
         // Set the beaver's silly name
         let beaverName = 'Mystery Beaver';
