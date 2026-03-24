@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1st Rustington Scouts - Beaver Builder</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦫</text></svg>">
+  <meta property="og:title" content="1st Rustington Scouts - Beaver Builder">
+  <meta property="og:description" content="Design your own Beaver character!">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fff;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 16px 32px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    header {
+      background: #7413dc;
+      color: #fff;
+      text-align: center;
+      padding: 20px 16px;
+      border-radius: 0 0 20px 20px;
+      margin: 0 -16px 8px;
+    }
+    header .emoji { font-size: 2.5rem; display: block; margin-bottom: 6px; }
+    header h1 { font-size: 1.3rem; font-weight: 700; line-height: 1.3; }
+
+    .category { margin-top: 20px; }
+    .category h2 { color: #4a3728; font-size: 1rem; margin-bottom: 8px; font-weight: 600; }
+
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .pill {
+      border-radius: 20px;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      border: 2px solid #ddd;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+      font-weight: 500;
+    }
+    .pill:active { transform: scale(0.95); }
+
+    /* Action pills — orange */
+    .pill[data-category="action"] { background: #fff3e6; color: #92400e; }
+    .pill[data-category="action"].selected { border-color: #f59e0b; background: #fde68a; transform: scale(1.05); }
+
+    /* Outfit pills — green */
+    .pill[data-category="outfit"] { background: #ecfdf5; color: #065f46; }
+    .pill[data-category="outfit"].selected { border-color: #10b981; background: #a7f3d0; transform: scale(1.05); }
+
+    /* Location pills — blue */
+    .pill[data-category="location"] { background: #eff6ff; color: #1e3a5f; }
+    .pill[data-category="location"].selected { border-color: #3b82f6; background: #bfdbfe; transform: scale(1.05); }
+
+    #recipe-card {
+      background: #fefce8;
+      border: 2px dashed #d4a053;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 20px 0;
+      font-style: italic;
+      font-size: 1rem;
+      min-height: 50px;
+      text-align: center;
+      color: #78350f;
+      line-height: 1.4;
+    }
+
+    #generate-btn {
+      width: 100%;
+      padding: 18px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      min-height: 60px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    #generate-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    #generate-btn:not(:disabled):active { transform: scale(0.97); background: #16a34a; }
+
+    #loading {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    #loading .pulse-emoji {
+      font-size: 4rem;
+      display: inline-block;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    #loading p {
+      font-size: 1.2rem;
+      color: #4a3728;
+      margin-top: 16px;
+      font-weight: 600;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.25); }
+    }
+
+    #result { text-align: center; }
+    #beaver-name {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #7413dc;
+      margin: 12px 0 4px;
+      line-height: 1.2;
+    }
+    #generated-image {
+      width: 100%;
+      border-radius: 12px;
+      margin: 16px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .result-buttons { display: flex; flex-direction: column; gap: 10px; }
+    .result-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      color: #fff;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    .result-btn:active { transform: scale(0.97); }
+    #save-btn { background: #3b82f6; }
+    #make-another-btn { background: #7413dc; }
+
+    #error {
+      text-align: center;
+      background: #fff7ed;
+      border: 2px solid #fb923c;
+      border-radius: 16px;
+      padding: 30px 20px;
+      margin: 20px 0;
+    }
+    #error p { color: #9a3412; font-size: 1.05rem; margin-bottom: 16px; line-height: 1.4; }
+    #retry-btn {
+      padding: 14px 32px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #fb923c;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #aaa;
+      font-size: 0.8rem;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="emoji">🦫</span>
+    <h1>1st Rustington Scouts<br>Beaver Builder</h1>
+  </header>
+
+  <div id="selectors">
+    <div class="category">
+      <h2>What's your Beaver doing?</h2>
+      <div class="pill-row">
+        <button class="pill" data-category="action" data-value="Swimming">Swimming</button>
+        <button class="pill" data-category="action" data-value="Cooking">Cooking</button>
+        <button class="pill" data-category="action" data-value="Skateboarding">Skateboarding</button>
+        <button class="pill" data-category="action" data-value="Flying a Rocket">Flying a Rocket</button>
+        <button class="pill" data-category="action" data-value="Painting a Picture">Painting a Picture</button>
+        <button class="pill" data-category="action" data-value="Playing Football">Playing Football</button>
+        <button class="pill" data-category="action" data-value="Surfing">Surfing</button>
+        <button class="pill" data-category="action" data-value="Dancing">Dancing</button>
+        <button class="pill" data-category="action" data-value="Building a Dam">Building a Dam</button>
+        <button class="pill" data-category="action" data-value="Doing a Handstand">Doing a Handstand</button>
+        <button class="pill" data-category="action" data-value="Riding a Dinosaur">Riding a Dinosaur</button>
+        <button class="pill" data-category="action" data-value="Playing Drums">Playing Drums</button>
+      </div>
+    </div>
+
+    <div class="category">
+      <h2>What are they wearing?</h2>
+      <div class="pill-row">
+        <button class="pill" data-category="outfit" data-value="Top Hat">Top Hat</button>
+        <button class="pill" data-category="outfit" data-value="Superhero Cape">Superhero Cape</button>
+        <button class="pill" data-category="outfit" data-value="Space Helmet">Space Helmet</button>
+        <button class="pill" data-category="outfit" data-value="Chef's Hat">Chef's Hat</button>
+        <button class="pill" data-category="outfit" data-value="Crown">Crown</button>
+        <button class="pill" data-category="outfit" data-value="Scarf & Goggles">Scarf & Goggles</button>
+        <button class="pill" data-category="outfit" data-value="Pirate Hat">Pirate Hat</button>
+        <button class="pill" data-category="outfit" data-value="Wizard Robe">Wizard Robe</button>
+        <button class="pill" data-category="outfit" data-value="Rainbow Tutu">Rainbow Tutu</button>
+        <button class="pill" data-category="outfit" data-value="Dinosaur Onesie">Dinosaur Onesie</button>
+        <button class="pill" data-category="outfit" data-value="Sunglasses">Sunglasses</button>
+        <button class="pill" data-category="outfit" data-value="Viking Helmet">Viking Helmet</button>
+        <button class="pill" data-category="outfit" data-value="Lab Coat">Lab Coat</button>
+        <button class="pill" data-category="outfit" data-value="Fairy Wings">Fairy Wings</button>
+        <button class="pill" data-category="outfit" data-value="Ninja Outfit">Ninja Outfit</button>
+        <button class="pill" data-category="outfit" data-value="Cowboy Hat">Cowboy Hat</button>
+      </div>
+    </div>
+
+    <div class="category">
+      <h2>Where are they?</h2>
+      <div class="pill-row">
+        <button class="pill" data-category="location" data-value="Outer Space">Outer Space</button>
+        <button class="pill" data-category="location" data-value="Underwater">Underwater</button>
+        <button class="pill" data-category="location" data-value="On a Mountain">On a Mountain</button>
+        <button class="pill" data-category="location" data-value="In a Jungle">In a Jungle</button>
+        <button class="pill" data-category="location" data-value="At the Beach">At the Beach</button>
+        <button class="pill" data-category="location" data-value="In a Castle">In a Castle</button>
+        <button class="pill" data-category="location" data-value="On the Moon">On the Moon</button>
+        <button class="pill" data-category="location" data-value="In a Volcano">In a Volcano</button>
+        <button class="pill" data-category="location" data-value="On a Pirate Ship">On a Pirate Ship</button>
+        <button class="pill" data-category="location" data-value="In a Sweet Shop">In a Sweet Shop</button>
+        <button class="pill" data-category="location" data-value="At a Funfair">At a Funfair</button>
+        <button class="pill" data-category="location" data-value="In a Treehouse">In a Treehouse</button>
+        <button class="pill" data-category="location" data-value="On a Rainbow">On a Rainbow</button>
+        <button class="pill" data-category="location" data-value="In a Submarine">In a Submarine</button>
+        <button class="pill" data-category="location" data-value="At a Campfire">At a Campfire</button>
+        <button class="pill" data-category="location" data-value="On a Cloud">On a Cloud</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="recipe-card">Pick your options above to design your Beaver!</div>
+
+  <button id="generate-btn" disabled>CREATE MY BEAVER! 🦫</button>
+
+  <div id="loading" class="hidden">
+    <span class="pulse-emoji">🦫</span>
+    <p>Building your Beaver...</p>
+  </div>
+
+  <div id="result" class="hidden">
+    <p id="beaver-name"></p>
+    <img id="generated-image" alt="Your generated beaver character">
+    <div class="result-buttons">
+      <button class="result-btn" id="save-btn">Save Image 💾</button>
+      <button class="result-btn" id="make-another-btn">Make Another! 🎨</button>
+    </div>
+  </div>
+
+  <div id="error" class="hidden">
+    <p>Oops! The Beaver Builder is having a rest. Try again in a moment!</p>
+    <button id="retry-btn">Try Again 🔄</button>
+  </div>
+
+  <footer>Made with 🦫 by 1st Rustington Scouts</footer>
+
+  <script>
+    // ── Config ──
+    // API key lives in Netlify env vars — never in the browser
+    const API_URL = '/.netlify/functions/generate';
+
+    // ── State ──
+    const state = { action: null, outfit: null, location: null };
+    const NAME_URL = '/.netlify/functions/name';
+
+    // ── Elements ──
+    const selectorsEl = document.getElementById('selectors');
+    const recipeCard = document.getElementById('recipe-card');
+    const generateBtn = document.getElementById('generate-btn');
+    const loadingEl = document.getElementById('loading');
+    const resultEl = document.getElementById('result');
+    const errorEl = document.getElementById('error');
+    const generatedImage = document.getElementById('generated-image');
+
+    // ── Pill Selection ──
+    document.body.addEventListener('click', (e) => {
+      const pill = e.target.closest('.pill');
+      if (!pill) return;
+
+      const category = pill.dataset.category;
+      const value = pill.dataset.value;
+
+      // Deselect others in same category
+      document.querySelectorAll(`.pill[data-category="${category}"]`).forEach(p => p.classList.remove('selected'));
+      pill.classList.add('selected');
+
+      state[category] = value;
+      updateRecipeCard();
+      updateGenerateButton();
+    });
+
+    function updateRecipeCard() {
+      if (!state.action && !state.outfit && !state.location) {
+        recipeCard.textContent = 'Pick your options above to design your Beaver!';
+        return;
+      }
+      const parts = [];
+      if (state.action) parts.push(`who is ${state.action.toLowerCase()}`);
+      if (state.outfit) parts.push(`wearing a ${state.outfit.toLowerCase()}`);
+      if (state.location) parts.push(`${state.location.toLowerCase()}`);
+      recipeCard.textContent = `A beaver ${parts.join(', ')}.`;
+    }
+
+    function updateGenerateButton() {
+      generateBtn.disabled = !(state.action && state.outfit && state.location);
+    }
+
+    // ── Prompt Builder ──
+    // Base art direction applied to every generation — kids don't see this
+    const ART_DIRECTION = 'Super cute Pixar-style 3D render aesthetic. Big expressive eyes, soft rounded shapes, warm cinematic lighting, rich vibrant colours. The character should look like it belongs in a Pixar short film — irresistibly adorable and full of personality.';
+
+    function buildPrompt() {
+      return `${ART_DIRECTION} Create an illustration of a cute beaver character who is ${state.action.toLowerCase()}, wearing a ${state.outfit.toLowerCase()}, ${state.location.toLowerCase()}. White background, no text in the image.`;
+    }
+
+    // ── Image Generation ──
+    async function generateImage() {
+      // Show loading, hide everything else
+      selectorsEl.classList.add('hidden');
+      generateBtn.classList.add('hidden');
+      recipeCard.classList.add('hidden');
+      loadingEl.classList.remove('hidden');
+      resultEl.classList.add('hidden');
+      errorEl.classList.add('hidden');
+
+      try {
+        // Fetch image and silly name in parallel
+        const [imageResponse, nameResponse] = await Promise.all([
+          fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: buildPrompt() }] }],
+              generationConfig: {
+                responseModalities: ['IMAGE']
+              }
+            })
+          }),
+          fetch(NAME_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: state.action.toLowerCase(),
+              outfit: state.outfit.toLowerCase(),
+              location: state.location.toLowerCase()
+            })
+          }).catch(() => null)
+        ]);
+
+        if (!imageResponse.ok) throw new Error(`API error: ${imageResponse.status}`);
+
+        const data = await imageResponse.json();
+        const imageData = data.candidates[0].content.parts[0].inline_data;
+        generatedImage.src = `data:${imageData.mime_type};base64,${imageData.data}`;
+
+        // Set the beaver's silly name
+        let beaverName = 'Mystery Beaver';
+        if (nameResponse && nameResponse.ok) {
+          const nameData = await nameResponse.json();
+          beaverName = nameData.name || beaverName;
+        }
+        document.getElementById('beaver-name').textContent = `Meet: ${beaverName}!`;
+
+        // Show result
+        loadingEl.classList.add('hidden');
+        resultEl.classList.remove('hidden');
+      } catch (err) {
+        console.error('Generation failed:', err);
+        loadingEl.classList.add('hidden');
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    // ── Button Handlers ──
+    generateBtn.addEventListener('click', generateImage);
+
+    document.getElementById('retry-btn').addEventListener('click', generateImage);
+
+    document.getElementById('make-another-btn').addEventListener('click', () => {
+      resultEl.classList.add('hidden');
+      selectorsEl.classList.remove('hidden');
+      generateBtn.classList.remove('hidden');
+      recipeCard.classList.remove('hidden');
+    });
+
+    document.getElementById('save-btn').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'my-beaver.png';
+      link.href = generatedImage.src;
+      link.click();
+    });
+  </script>
+
+</body>
+</html>
