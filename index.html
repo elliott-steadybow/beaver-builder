@@ -197,6 +197,18 @@
         <button class="pill" data-category="action" data-value="Doing a Handstand">Doing a Handstand</button>
         <button class="pill" data-category="action" data-value="Riding a Dinosaur">Riding a Dinosaur</button>
         <button class="pill" data-category="action" data-value="Playing Drums">Playing Drums</button>
+        <button class="pill" data-category="action" data-value="Karate Chopping">Karate Chopping</button>
+        <button class="pill" data-category="action" data-value="Riding a Unicycle">Riding a Unicycle</button>
+        <button class="pill" data-category="action" data-value="Juggling">Juggling</button>
+        <button class="pill" data-category="action" data-value="Baking a Cake">Baking a Cake</button>
+        <button class="pill" data-category="action" data-value="Doing Magic Tricks">Doing Magic Tricks</button>
+        <button class="pill" data-category="action" data-value="Flying a Kite">Flying a Kite</button>
+        <button class="pill" data-category="action" data-value="Digging for Treasure">Digging for Treasure</button>
+        <button class="pill" data-category="action" data-value="Bouncing on a Trampoline">Bouncing on a Trampoline</button>
+        <button class="pill" data-category="action" data-value="Doing a Science Experiment">Doing a Science Experiment</button>
+        <button class="pill" data-category="action" data-value="Eating Ice Cream">Eating Ice Cream</button>
+        <button class="pill" data-category="action" data-value="Riding a Rollercoaster">Riding a Rollercoaster</button>
+        <button class="pill" data-category="action" data-value="Playing Guitar">Playing Guitar</button>
       </div>
     </div>
 
@@ -219,6 +231,16 @@
         <button class="pill" data-category="outfit" data-value="Fairy Wings">Fairy Wings</button>
         <button class="pill" data-category="outfit" data-value="Ninja Outfit">Ninja Outfit</button>
         <button class="pill" data-category="outfit" data-value="Cowboy Hat">Cowboy Hat</button>
+        <button class="pill" data-category="outfit" data-value="Astronaut Suit">Astronaut Suit</button>
+        <button class="pill" data-category="outfit" data-value="Clown Wig">Clown Wig</button>
+        <button class="pill" data-category="outfit" data-value="Bee Costume">Bee Costume</button>
+        <button class="pill" data-category="outfit" data-value="Sparkly Boots">Sparkly Boots</button>
+        <button class="pill" data-category="outfit" data-value="Robot Armour">Robot Armour</button>
+        <button class="pill" data-category="outfit" data-value="Dragon Wings">Dragon Wings</button>
+        <button class="pill" data-category="outfit" data-value="Mermaid Tail">Mermaid Tail</button>
+        <button class="pill" data-category="outfit" data-value="Detective Coat">Detective Coat</button>
+        <button class="pill" data-category="outfit" data-value="Beavers Uniform">Beavers Uniform</button>
+        <button class="pill" data-category="outfit" data-value="Banana Suit">Banana Suit</button>
       </div>
     </div>
 
@@ -241,6 +263,16 @@
         <button class="pill" data-category="location" data-value="In a Submarine">In a Submarine</button>
         <button class="pill" data-category="location" data-value="At a Campfire">At a Campfire</button>
         <button class="pill" data-category="location" data-value="On a Cloud">On a Cloud</button>
+        <button class="pill" data-category="location" data-value="In a Giant Sandwich">In a Giant Sandwich</button>
+        <button class="pill" data-category="location" data-value="On a Skateboard Ramp">On a Skateboard Ramp</button>
+        <button class="pill" data-category="location" data-value="In a Haunted House">In a Haunted House</button>
+        <button class="pill" data-category="location" data-value="At a Disco">At a Disco</button>
+        <button class="pill" data-category="location" data-value="Inside a Bubble">Inside a Bubble</button>
+        <button class="pill" data-category="location" data-value="On a Waterslide">On a Waterslide</button>
+        <button class="pill" data-category="location" data-value="In a Library">In a Library</button>
+        <button class="pill" data-category="location" data-value="On Top of a Pizza">On Top of a Pizza</button>
+        <button class="pill" data-category="location" data-value="In a Snow Globe">In a Snow Globe</button>
+        <button class="pill" data-category="location" data-value="At the North Pole">At the North Pole</button>
       </div>
     </div>
   </div>
@@ -348,7 +380,8 @@
             body: JSON.stringify({
               contents: [{ parts: [{ text: buildPrompt() }] }],
               generationConfig: {
-                responseModalities: ['TEXT', 'IMAGE']
+                responseModalities: ['TEXT', 'IMAGE'],
+              aspectRatio: '1:1'
               }
             })
           }),
