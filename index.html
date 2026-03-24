@@ -348,7 +348,7 @@
             body: JSON.stringify({
               contents: [{ parts: [{ text: buildPrompt() }] }],
               generationConfig: {
-                responseModalities: ['IMAGE']
+                responseModalities: ['TEXT', 'IMAGE']
               }
             })
           }),
@@ -369,8 +369,11 @@
 
         if (!imageResponse.ok) throw new Error(`API error ${imageResponse.status}: ${JSON.stringify(data)}`);
 
-        const imageData = data.candidates[0].content.parts[0].inline_data;
-        generatedImage.src = `data:${imageData.mime_type};base64,${imageData.data}`;
+        // Find the image part in the response (might not be first if TEXT is also returned)
+        const parts = data.candidates[0].content.parts;
+        const imagePart = parts.find(p => p.inline_data);
+        if (!imagePart) throw new Error('No image in response');
+        generatedImage.src = `data:${imagePart.inline_data.mime_type};base64,${imagePart.inline_data.data}`;
 
         // Set the beaver's silly name
         let beaverName = 'Mystery Beaver';
