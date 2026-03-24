@@ -363,9 +363,12 @@
           }).catch(() => null)
         ]);
 
-        if (!imageResponse.ok) throw new Error(`API error: ${imageResponse.status}`);
-
+        console.log('Image response status:', imageResponse.status);
         const data = await imageResponse.json();
+        console.log('Image response body:', JSON.stringify(data).substring(0, 500));
+
+        if (!imageResponse.ok) throw new Error(`API error ${imageResponse.status}: ${JSON.stringify(data)}`);
+
         const imageData = data.candidates[0].content.parts[0].inline_data;
         generatedImage.src = `data:${imageData.mime_type};base64,${imageData.data}`;
 
@@ -373,6 +376,7 @@
         let beaverName = 'Mystery Beaver';
         if (nameResponse && nameResponse.ok) {
           const nameData = await nameResponse.json();
+          console.log('Name response:', nameData);
           beaverName = nameData.name || beaverName;
         }
         document.getElementById('beaver-name').textContent = `Meet: ${beaverName}!`;
@@ -382,6 +386,7 @@
         resultEl.classList.remove('hidden');
       } catch (err) {
         console.error('Generation failed:', err);
+        console.error('Full error:', err.message);
         loadingEl.classList.add('hidden');
         errorEl.classList.remove('hidden');
       }

@@ -25,7 +25,7 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: 'API key not configured' }) };
   }
 
-  const MODEL = 'gemini-2.0-flash-exp';
+  const MODEL = 'gemini-2.0-flash-exp-image-generation';
   const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
   try {
