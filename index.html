@@ -358,7 +358,7 @@
     const ART_DIRECTION = 'Super cute Pixar-style 3D render aesthetic. Big expressive eyes, soft rounded shapes, warm cinematic lighting, rich vibrant colours. The character should look like it belongs in a Pixar short film — irresistibly adorable and full of personality.';
 
     function buildPrompt() {
-      return `${ART_DIRECTION} Create an illustration of a cute beaver character who is ${state.action.toLowerCase()}, wearing a ${state.outfit.toLowerCase()}, ${state.location.toLowerCase()}. White background, no text in the image.`;
+      return `${ART_DIRECTION} Create a square 1:1 aspect ratio illustration of a cute beaver character who is ${state.action.toLowerCase()}, wearing a ${state.outfit.toLowerCase()}, ${state.location.toLowerCase()}. White background, no text in the image.`;
     }
 
     // ── Image Generation ──
@@ -380,8 +380,7 @@
             body: JSON.stringify({
               contents: [{ parts: [{ text: buildPrompt() }] }],
               generationConfig: {
-                responseModalities: ['TEXT', 'IMAGE'],
-              aspectRatio: '1:1'
+                responseModalities: ['TEXT', 'IMAGE']
               }
             })
           }),
